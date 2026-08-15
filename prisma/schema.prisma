@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int    @id @default(autoincrement())
+  username     String @unique
+  passwordHash String @map("password_hash")
+  nama         String
+
+  @@map("users")
+}
+
+model Item {
+  id          Int    @id @default(autoincrement())
+  kode        String @unique
+  namaBarang  String @map("nama_barang")
+  kategori    String @default("")
+  namaToko    String @default("") @map("nama_toko")
+  jumlah      Int    @default(0)
+  hargaSatuan Int    @default(0) @map("harga_satuan")
+  lokasi      String @default("")
+  kondisi     String @default("Baik")
+  createdAt   String @map("created_at")
+  updatedAt   String @map("updated_at")
+
+  @@map("items")
+}
