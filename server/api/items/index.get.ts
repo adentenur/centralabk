@@ -1,4 +1,4 @@
-export default defineEventHandler(() => {
-  const rows = db.prepare('SELECT * FROM items ORDER BY id ASC').all() as ItemRow[]
-  return rows.map(mapItem)
+export default defineEventHandler(async () => {
+  const items = await prisma.item.findMany({ orderBy: { id: 'asc' } })
+  return items.map(mapItem)
 })

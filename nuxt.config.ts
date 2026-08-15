@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
-    sessionPassword: process.env.NUXT_SESSION_PASSWORD || ''
+    sessionPassword: process.env.NUXT_SESSION_PASSWORD || '',
+    sessionSecureCookie: process.env.NUXT_SESSION_SECURE_COOKIE !== 'false'
   }
 })

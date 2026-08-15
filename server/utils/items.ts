@@ -1,34 +1,22 @@
-export interface ItemRow {
-  id: number
-  kode: string
-  nama_barang: string
-  kategori: string
-  nama_toko: string
-  jumlah: number
-  harga_satuan: number
-  lokasi: string
-  kondisi: string
-  created_at: string
-  updated_at: string
-}
+import type { Item } from '@prisma/client'
 
 export const KONDISI_VALUES = ['Baik', 'Perbaikan', 'Rusak'] as const
 export type Kondisi = (typeof KONDISI_VALUES)[number]
 
-export function mapItem(row: ItemRow) {
+export function mapItem(item: Item) {
   return {
-    id: row.id,
-    kode: row.kode,
-    namaBarang: row.nama_barang,
-    kategori: row.kategori,
-    namaToko: row.nama_toko,
-    jumlah: row.jumlah,
-    hargaSatuan: row.harga_satuan,
-    total: row.jumlah * row.harga_satuan,
-    lokasi: row.lokasi,
-    kondisi: row.kondisi,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at
+    id: item.id,
+    kode: item.kode,
+    namaBarang: item.namaBarang,
+    kategori: item.kategori,
+    namaToko: item.namaToko,
+    jumlah: item.jumlah,
+    hargaSatuan: item.hargaSatuan,
+    total: item.jumlah * item.hargaSatuan,
+    lokasi: item.lokasi,
+    kondisi: item.kondisi,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt
   }
 }
 

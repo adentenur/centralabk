@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'ID barang tidak valid' })
   }
 
-  const existing = db.prepare('SELECT * FROM items WHERE id = ?').get(id) as ItemRow | undefined
+  const existing = await prisma.item.findUnique({ where: { id } })
   if (!existing) {
     throw createError({ statusCode: 404, statusMessage: 'Barang tidak ditemukan' })
   }
@@ -12,19 +12,10 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const input = parseItemInput(body ?? {})
 
-  db.prepare(`
-    UPDATE items SET
-      nama_barang = @namaBarang,
-      kategori = @kategori,
-      nama_toko = @namaToko,
-      jumlah = @jumlah,
-      harga_satuan = @hargaSatuan,
-      lokasi = @lokasi,
-      kondisi = @kondisi,
-      updated_at = datetime('now')
-    WHERE id = @id
-  `).run({ ...input, id })
+  const item = await prisma.item.update({
+    where: { id },
+    data: { ...input, updatedAt: new Date().toISOString() }
+  })
 
-  const row = db.prepare('SELECT * FROM items WHERE id = ?').get(id) as ItemRow
-  return mapItem(row)
+  return mapItem(item)
 })

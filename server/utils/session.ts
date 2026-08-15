@@ -8,10 +8,10 @@ export interface AuthSessionData {
 }
 
 export function useAuthSession(event: H3Event) {
-  const { sessionPassword } = useRuntimeConfig()
+  const { sessionPassword, sessionSecureCookie } = useRuntimeConfig()
   return useSession<AuthSessionData>(event, {
     name: 'inventaris-session',
     password: sessionPassword,
-    cookie: { sameSite: 'lax' }
+    cookie: { sameSite: 'lax', secure: sessionSecureCookie }
   })
 }

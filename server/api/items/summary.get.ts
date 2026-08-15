@@ -1,21 +1,20 @@
-export default defineEventHandler(() => {
-  const totalBarang = (db.prepare('SELECT COALESCE(SUM(jumlah), 0) AS n FROM items').get() as { n: number }).n
-  const totalKategori = (db.prepare('SELECT COUNT(DISTINCT kategori) AS n FROM items').get() as { n: number }).n
-  const kondisiBaik = (db.prepare("SELECT COALESCE(SUM(jumlah), 0) AS n FROM items WHERE kondisi = 'Baik'").get() as { n: number }).n
-  const perluPerhatian = (db.prepare("SELECT COALESCE(SUM(jumlah), 0) AS n FROM items WHERE kondisi != 'Baik'").get() as { n: number }).n
-  const kategoriTerbanyak = db.prepare(`
-    SELECT kategori, SUM(jumlah) AS total
-    FROM items
-    GROUP BY kategori
-    ORDER BY total DESC
-    LIMIT 1
-  `).get() as { kategori: string, total: number } | undefined
+export default defineEventHandler(async () => {
+  const [totalBarangAgg, baikAgg, semuaAgg, kategoriGroup] = await Promise.all([
+    prisma.item.aggregate({ _sum: { jumlah: true } }),
+    prisma.item.aggregate({ _sum: { jumlah: true }, where: { kondisi: 'Baik' } }),
+    prisma.item.aggregate({ _sum: { jumlah: true } }),
+    prisma.item.groupBy({
+      by: ['kategori'],
+      _sum: { jumlah: true },
+      orderBy: { _sum: { jumlah: 'desc' } }
+    })
+  ])
 
-  return {
-    totalBarang,
-    totalKategori,
-    kondisiBaik,
-    perluPerhatian,
-    kategoriTerbanyak: kategoriTerbanyak?.kategori ?? '-'
-  }
+  const totalBarang = totalBarangAgg._sum.jumlah ?? 0
+  const kondisiBaik = baikAgg._sum.jumlah ?? 0
+  const perluPerhatian = (semuaAgg._sum.jumlah ?? 0) - kondisiBaik
+  const totalKategori = kategoriGroup.length
+  const kategoriTerbanyak = kategoriGroup[0]?.kategori || '-'
+
+  return { totalBarang, totalKategori, kondisiBaik, perluPerhatian, kategoriTerbanyak }
 })
