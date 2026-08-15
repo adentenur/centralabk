@@ -6,6 +6,27 @@ const password = ref('')
 const errorMsg = ref('')
 const loading = ref(false)
 
+type DbStatus = 'checking' | 'connected' | 'disconnected'
+const dbStatus = ref<DbStatus>('checking')
+
+const dbStatusText = computed(() => {
+  if (dbStatus.value === 'connected') return 'Terhubung ke database'
+  if (dbStatus.value === 'disconnected') return 'Tidak dapat terhubung ke database'
+  return 'Memeriksa koneksi database…'
+})
+
+async function checkDbStatus() {
+  dbStatus.value = 'checking'
+  try {
+    const res = await $fetch<{ connected: boolean }>('/api/health/db')
+    dbStatus.value = res.connected ? 'connected' : 'disconnected'
+  } catch {
+    dbStatus.value = 'disconnected'
+  }
+}
+
+onMounted(checkDbStatus)
+
 async function handleSubmit() {
   if (loading.value) return
   errorMsg.value = ''
@@ -65,7 +86,11 @@ async function handleSubmit() {
           </div>
         </div>
         <button class="login-btn" type="submit" :disabled="loading">{{ loading ? 'Memproses…' : 'Masuk' }}</button>
-        <div class="login-foot"><span class="dot" /> Terhubung ke database lokal (SQLite)</div>
+        <div class="login-foot">
+          <span class="dot" :class="dbStatus" />
+          {{ dbStatusText }}
+          <button v-if="dbStatus === 'disconnected'" type="button" class="retry-link" @click="checkDbStatus">Coba lagi</button>
+        </div>
       </form>
     </div>
   </div>
@@ -272,8 +297,32 @@ async function handleSubmit() {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--good);
+  background: var(--text-muted);
   flex-shrink: 0;
+}
+
+.login-foot .dot.connected {
+  background: var(--good);
+}
+
+.login-foot .dot.disconnected {
+  background: var(--crit);
+}
+
+.login-foot .dot.checking {
+  background: var(--warn);
+}
+
+.retry-link {
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 @media (max-width: 860px) {
