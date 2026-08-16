@@ -11,6 +11,7 @@
     "db:push": "prisma db push"
   },
   "dependencies": {
+    "@nuxtjs/supabase": "^2.0.10",
     "@prisma/client": "^6.19.3",
     "bcryptjs": "^3.0.3",
     "nuxt": "^4.5.2",
