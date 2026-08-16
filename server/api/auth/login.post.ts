@@ -17,5 +17,8 @@ export default defineEventHandler(async (event) => {
   const session = await useAuthSession(event)
   await session.update({ userId: user.id, username: user.username, nama: user.nama })
 
+  console.log('LOGIN SESSION:', session.data)
+console.log('SET COOKIE:', getResponseHeader(event, 'set-cookie'))
+
   return { username: user.username, nama: user.nama }
 })
