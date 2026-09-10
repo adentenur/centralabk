@@ -11,6 +11,7 @@ export function mapItem(item: Item) {
     kategori: item.kategori,
     namaToko: item.namaToko,
     jumlah: item.jumlah,
+    satuan: item.satuan,
     hargaSatuan: item.hargaSatuan,
     total: item.jumlah * item.hargaSatuan,
     lokasi: item.lokasi,
@@ -25,6 +26,7 @@ export interface ItemInput {
   kategori: string
   namaToko: string
   jumlah: number
+  satuan: string
   hargaSatuan: number
   lokasi: string
   kondisi: string
@@ -34,6 +36,7 @@ export function parseItemInput(body: Record<string, unknown>): ItemInput {
   const namaBarang = String(body.namaBarang ?? '').trim()
   const kategori = String(body.kategori ?? '').trim()
   const namaToko = String(body.namaToko ?? '').trim()
+  const satuan = String(body.satuan ?? '').trim()
   const lokasi = String(body.lokasi ?? '').trim()
   const kondisi = String(body.kondisi ?? '').trim()
   const jumlahRaw = body.jumlah
@@ -46,5 +49,5 @@ export function parseItemInput(body: Record<string, unknown>): ItemInput {
   if (!Number.isFinite(jumlah) || jumlah < 0) throw createError({ statusCode: 400, statusMessage: 'Jumlah harus berupa angka positif' })
   if (!Number.isFinite(hargaSatuan) || hargaSatuan < 0) throw createError({ statusCode: 400, statusMessage: 'Harga satuan harus berupa angka positif' })
 
-  return { namaBarang, kategori, namaToko, jumlah, hargaSatuan, lokasi, kondisi }
+  return { namaBarang, kategori, namaToko, jumlah, satuan, hargaSatuan, lokasi, kondisi }
 }

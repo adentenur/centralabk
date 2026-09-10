@@ -31,4 +31,13 @@ export async function ensureSeeded() {
       })
     }
   }
+
+  const satuanCount = await prisma.satuan.count()
+  if (satuanCount === 0) {
+    const now = new Date().toISOString()
+    const satuanSeed = ['Unit', 'Pcs', 'Dus', 'Sak', 'Kg', 'Liter', 'Batang', 'Kaleng', 'Box', 'Meter']
+    for (const nama of satuanSeed) {
+      await prisma.satuan.create({ data: { nama, createdAt: now } })
+    }
+  }
 }

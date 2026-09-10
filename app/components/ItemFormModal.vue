@@ -17,17 +17,21 @@ const form = ref<ItemFormState>(emptyItemForm())
 const saving = ref(false)
 const errorMsg = ref('')
 
+const { satuanOptions, loadSatuanOptions } = useSatuanOptions()
+
 watch(
   () => [props.open, props.item],
   () => {
     if (!props.open) return
     errorMsg.value = ''
+    loadSatuanOptions()
     if (props.mode === 'edit' && props.item) {
       form.value = {
         namaBarang: props.item.namaBarang,
         kategori: props.item.kategori,
         namaToko: props.item.namaToko,
         jumlah: props.item.jumlah,
+        satuan: props.item.satuan,
         hargaSatuan: props.item.hargaSatuan,
         lokasi: props.item.lokasi,
         kondisi: props.item.kondisi
@@ -49,6 +53,7 @@ async function handleSubmit() {
       kategori: form.value.kategori.trim(),
       namaToko: form.value.namaToko.trim(),
       jumlah: Number(form.value.jumlah),
+      satuan: form.value.satuan,
       hargaSatuan: Number(form.value.hargaSatuan),
       lokasi: form.value.lokasi.trim(),
       kondisi: form.value.kondisi
@@ -94,10 +99,17 @@ async function handleSubmit() {
           <input id="namaToko" v-model="form.namaToko" type="text" placeholder="Contoh: Toko Komputer Medan Jaya">
         </div>
 
-        <div class="grid-2">
+        <div class="grid-3">
           <div class="field">
             <label for="jumlah">Jumlah <span class="optional">(opsional)</span></label>
             <input id="jumlah" v-model.number="form.jumlah" type="number" min="0" step="1" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="satuan">Satuan <span class="optional">(opsional)</span></label>
+            <select id="satuan" v-model="form.satuan">
+              <option value="">Pilih satuan</option>
+              <option v-for="opt in satuanOptions" :key="opt.id" :value="opt.nama">{{ opt.nama }}</option>
+            </select>
           </div>
           <div class="field">
             <label for="hargaSatuan">Harga satuan (Rp) <span class="optional">(opsional)</span></label>
@@ -203,6 +215,12 @@ async function handleSubmit() {
   gap: 14px;
 }
 
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+
 .field {
   margin-bottom: 16px;
 }
@@ -280,7 +298,8 @@ async function handleSubmit() {
 }
 
 @media (max-width: 560px) {
-  .grid-2 {
+  .grid-2,
+  .grid-3 {
     grid-template-columns: 1fr;
   }
 }

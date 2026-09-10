@@ -1,6 +1,7 @@
 export default defineEventHandler(async (event) => {
   const path = event.path || event.node.req.url || ''
-  if (!path.startsWith('/api/items')) return
+  const isProtected = path.startsWith('/api/items') || path.startsWith('/api/surat-jalan') || path.startsWith('/api/satuan')
+  if (!isProtected) return
 
   const session = await useAuthSession(event)
   if (!session.data.userId) {

@@ -5,6 +5,7 @@ export interface Item {
   kategori: string
   namaToko: string
   jumlah: number
+  satuan: string
   hargaSatuan: number
   total: number
   lokasi: string
@@ -18,6 +19,7 @@ export interface ItemFormState {
   kategori: string
   namaToko: string
   jumlah: number | null
+  satuan: string
   hargaSatuan: number | null
   lokasi: string
   kondisi: 'Baik' | 'Perbaikan' | 'Rusak'
@@ -29,6 +31,7 @@ export function emptyItemForm(): ItemFormState {
     kategori: '',
     namaToko: '',
     jumlah: null,
+    satuan: '',
     hargaSatuan: null,
     lokasi: '',
     kondisi: 'Baik'

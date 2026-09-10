@@ -24,6 +24,7 @@ model Item {
   kategori    String @default("")
   namaToko    String @default("") @map("nama_toko")
   jumlah      Int    @default(0)
+  satuan      String @default("")
   hargaSatuan Int    @default(0) @map("harga_satuan")
   lokasi      String @default("")
   kondisi     String @default("Baik")
@@ -31,4 +32,39 @@ model Item {
   updatedAt   String @map("updated_at")
 
   @@map("items")
+}
+
+model Satuan {
+  id        Int    @id @default(autoincrement())
+  nama      String @unique
+  createdAt String @map("created_at")
+
+  @@map("satuan")
+}
+
+model SuratJalan {
+  id           Int              @id @default(autoincrement())
+  nomorSurat   String           @map("nomor_surat")
+  tanggal      String
+  namaPengirim String           @default("") @map("nama_pengirim")
+  asalBarang   String           @default("") @map("asal_barang")
+  namaPenerima String           @default("") @map("nama_penerima")
+  keterangan   String           @default("")
+  createdAt    String           @map("created_at")
+  updatedAt    String           @map("updated_at")
+  items        SuratJalanItem[]
+
+  @@map("surat_jalan")
+}
+
+model SuratJalanItem {
+  id           Int        @id @default(autoincrement())
+  suratJalanId Int        @map("surat_jalan_id")
+  suratJalan   SuratJalan @relation(fields: [suratJalanId], references: [id], onDelete: Cascade)
+  namaBarang   String     @map("nama_barang")
+  jumlah       Int        @default(0)
+  satuan       String     @default("")
+  urutan       Int        @default(0)
+
+  @@map("surat_jalan_items")
 }

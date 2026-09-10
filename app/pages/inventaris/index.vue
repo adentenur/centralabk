@@ -58,6 +58,17 @@ function kondisiPillClass(kondisi: string) {
   return 'crit'
 }
 
+const searchQuery = ref('')
+
+const filteredItems = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase()
+  if (!query) return items.value ?? []
+  return (items.value ?? []).filter((item) => {
+    return [item.namaBarang, item.kode, item.kategori, item.namaToko, item.lokasi]
+      .some((field) => field.toLowerCase().includes(query))
+  })
+})
+
 const user = useCurrentUser()
 </script>
 
@@ -101,6 +112,10 @@ const user = useCurrentUser()
       <div class="panel-head">
         <h3>Daftar Barang</h3>
         <div class="panel-actions">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.35-4.35" /></svg>
+            <input v-model="searchQuery" type="text" placeholder="Cari nama barang, kode, kategori...">
+          </div>
           <button class="btn-solid" type="button" @click="openCreate">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" /></svg>
             Tambah Barang
@@ -136,7 +151,7 @@ const user = useCurrentUser()
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in items" :key="item.id">
+            <tr v-for="(item, index) in filteredItems" :key="item.id">
               <td class="figures">{{ index + 1 }}</td>
               <td>
                 <div class="item-name">{{ item.namaBarang }}</div>
@@ -144,7 +159,7 @@ const user = useCurrentUser()
               </td>
               <td>{{ item.kategori }}</td>
               <td>{{ item.namaToko }}</td>
-              <td class="figures">{{ item.jumlah }} unit</td>
+              <td class="figures">{{ item.jumlah }} {{ item.satuan || '-' }}</td>
               <td class="figures">{{ formatRupiah(item.hargaSatuan) }}</td>
               <td class="figures">{{ formatRupiah(item.total) }}</td>
               <td>{{ item.lokasi }}</td>
@@ -164,7 +179,10 @@ const user = useCurrentUser()
                 </button>
               </td>
             </tr>
-            <tr v-if="!items?.length">
+            <tr v-if="items?.length && !filteredItems.length">
+              <td colspan="10" class="empty-row">Tidak ada barang yang cocok dengan pencarian "{{ searchQuery }}".</td>
+            </tr>
+            <tr v-else-if="!items?.length">
               <td colspan="10" class="empty-row">Belum ada barang tercatat. Klik "Tambah Barang" untuk mulai mengisi inventaris.</td>
             </tr>
           </tbody>
@@ -308,11 +326,49 @@ const user = useCurrentUser()
   justify-content: space-between;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
 .panel-head h3 {
   font-size: 15.5px;
   margin: 0;
+}
+
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-sunken);
+  border-radius: 8px;
+  padding: 0 10px;
+  width: 240px;
+}
+
+.search-box svg {
+  width: 15px;
+  height: 15px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  padding: 8px 0;
+  width: 100%;
 }
 
 .btn-solid {
