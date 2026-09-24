@@ -1,6 +1,12 @@
 <script setup lang="ts">
 const user = useCurrentUser()
 const loggingOut = ref(false)
+const mobileOpen = ref(false)
+
+const route = useRoute()
+watch(() => route.fullPath, () => {
+  mobileOpen.value = false
+})
 
 const initials = computed(() => {
   const name = user.value?.nama || user.value?.username || ''
@@ -26,7 +32,22 @@ async function handleLogout() {
 </script>
 
 <template>
-  <aside class="sidebar">
+  <header class="mobile-topbar">
+    <button type="button" class="hamburger" aria-label="Buka menu" @click="mobileOpen = true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+    </button>
+    <div class="mobile-brand">
+      <div class="crate-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></svg>
+      </div>
+      <span>Gudang Inventaris</span>
+    </div>
+    <div class="mobile-avatar">{{ initials }}</div>
+  </header>
+
+  <div v-if="mobileOpen" class="backdrop" @click="mobileOpen = false" />
+
+  <aside class="sidebar" :class="{ 'mobile-open': mobileOpen }">
     <div class="brand">
       <div class="crate-mark">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></svg>
@@ -35,6 +56,9 @@ async function handleLogout() {
         <p class="brand-name">Gudang Inventaris</p>
         <p class="brand-sub">Kantor Deli Serdang</p>
       </div>
+      <button type="button" class="close-btn" aria-label="Tutup menu" @click="mobileOpen = false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6 6 18" /></svg>
+      </button>
     </div>
 
     <p class="nav-label">Menu</p>
@@ -73,6 +97,14 @@ async function handleLogout() {
 </template>
 
 <style scoped>
+.mobile-topbar {
+  display: none;
+}
+
+.backdrop {
+  display: none;
+}
+
 .sidebar {
   background: var(--sidebar-bg);
   color: var(--sidebar-text);
@@ -119,6 +151,26 @@ async function handleLogout() {
   color: var(--sidebar-text-dim);
   font-size: 11px;
   margin: 1px 0 0;
+}
+
+.close-btn {
+  display: none;
+  margin-left: auto;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--sidebar-text);
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.close-btn svg {
+  width: 15px;
+  height: 15px;
 }
 
 .nav-label {
@@ -225,5 +277,114 @@ async function handleLogout() {
 .nav-item.logout:disabled {
   opacity: 0.6;
   cursor: default;
+}
+
+@media (max-width: 860px) {
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+
+  .hamburger {
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .hamburger svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mobile-brand .crate-mark {
+    width: 28px;
+    height: 28px;
+  }
+
+  .mobile-brand .crate-mark svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .mobile-brand span {
+    font-family: Georgia, serif;
+    font-size: 14.5px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11px;
+    font-family: Georgia, serif;
+    flex-shrink: 0;
+  }
+
+  .backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+  }
+
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 268px;
+    max-width: 82vw;
+    min-height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    z-index: 50;
+    overflow-y: auto;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .close-btn {
+    display: inline-flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
+  }
 }
 </style>

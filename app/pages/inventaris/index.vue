@@ -152,21 +152,22 @@ const user = useCurrentUser()
           </thead>
           <tbody>
             <tr v-for="(item, index) in filteredItems" :key="item.id">
-              <td class="figures">{{ index + 1 }}</td>
-              <td>
+              <td class="figures row-no" data-label="No.">{{ index + 1 }}</td>
+              <td data-label="Nama Barang">
                 <div class="item-name">{{ item.namaBarang }}</div>
                 <div class="item-code">{{ item.kode }}</div>
               </td>
-              <td>{{ item.kategori }}</td>
-              <td>{{ item.namaToko }}</td>
-              <td class="figures">{{ item.jumlah }} {{ item.satuan || '-' }}</td>
-              <td class="figures">{{ formatRupiah(item.hargaSatuan) }}</td>
-              <td class="figures">{{ formatRupiah(item.total) }}</td>
-              <td>{{ item.lokasi }}</td>
-              <td><span class="pill" :class="kondisiPillClass(item.kondisi)">{{ item.kondisi }}</span></td>
+              <td data-label="Kategori">{{ item.kategori || '-' }}</td>
+              <td data-label="Nama Toko">{{ item.namaToko || '-' }}</td>
+              <td class="figures" data-label="Jumlah">{{ item.jumlah }} {{ item.satuan || '-' }}</td>
+              <td class="figures" data-label="Harga Satuan">{{ formatRupiah(item.hargaSatuan) }}</td>
+              <td class="figures" data-label="Total">{{ formatRupiah(item.total) }}</td>
+              <td data-label="Lokasi">{{ item.lokasi || '-' }}</td>
+              <td data-label="Kondisi"><span class="pill" :class="kondisiPillClass(item.kondisi)">{{ item.kondisi }}</span></td>
               <td class="actions-cell">
                 <button type="button" class="icon-btn" aria-label="Ubah" @click="openEdit(item)">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3Z" /></svg>
+                  <span class="mobile-only">Ubah</span>
                 </button>
                 <button
                   type="button"
@@ -176,6 +177,7 @@ const user = useCurrentUser()
                   @click="handleDelete(item)"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 7h14M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m-9 0 1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13" /></svg>
+                  <span class="mobile-only">Hapus</span>
                 </button>
               </td>
             </tr>
@@ -518,9 +520,100 @@ tbody tr:hover {
   white-space: normal;
 }
 
+.mobile-only {
+  display: none;
+}
+
 @media (max-width: 860px) {
   .stat-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .main {
+    padding: 16px 14px 28px;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .panel-actions {
+    width: 100%;
+  }
+
+  .btn-solid {
+    flex: 1;
+    justify-content: center;
+  }
+
+  table,
+  thead,
+  tbody,
+  tr,
+  td {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody tr {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 12px;
+  }
+
+  tbody tr:hover {
+    background: var(--surface);
+  }
+
+  tbody td {
+    border: none;
+    padding: 6px 0;
+  }
+
+  tbody td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  td.row-no {
+    display: none;
+  }
+
+  td.actions-cell {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding-top: 10px;
+    margin-top: 4px;
+    border-top: 1px solid var(--border);
+  }
+
+  .icon-btn {
+    width: auto;
+    padding: 7px 12px;
+  }
+
+  .mobile-only {
+    display: inline;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  .empty-row {
+    padding: 24px 14px;
   }
 }
 </style>

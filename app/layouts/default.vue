@@ -26,6 +26,7 @@ await fetchCurrentUser()
 @media (max-width: 860px) {
   .dash-shell {
     grid-template-columns: 1fr;
+    min-height: 0;
   }
 }
 </style>

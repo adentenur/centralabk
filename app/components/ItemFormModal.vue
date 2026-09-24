@@ -302,5 +302,14 @@ async function handleSubmit() {
   .grid-3 {
     grid-template-columns: 1fr;
   }
+
+  .modal-card {
+    padding: 18px 16px 20px;
+  }
+
+  .field input,
+  .field select {
+    font-size: 16px;
+  }
 }
 </style>

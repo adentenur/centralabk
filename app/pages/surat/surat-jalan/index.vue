@@ -117,24 +117,25 @@ const user = useCurrentUser()
           </thead>
           <tbody>
             <tr v-for="(surat, index) in filteredSuratJalan" :key="surat.id">
-              <td class="figures">{{ index + 1 }}</td>
-              <td class="mono">{{ surat.nomorSurat }}</td>
-              <td class="figures">{{ formatTanggal(surat.tanggal) }}</td>
-              <td>
+              <td class="figures row-no" data-label="No.">{{ index + 1 }}</td>
+              <td class="mono" data-label="Nomor Surat">{{ surat.nomorSurat }}</td>
+              <td class="figures" data-label="Tanggal">{{ formatTanggal(surat.tanggal) }}</td>
+              <td data-label="Daftar Barang">
                 <div v-for="(item, itemIndex) in surat.items" :key="itemIndex" class="barang-line">
                   {{ item.namaBarang }}
                   <span class="item-code">{{ item.jumlah }} {{ item.satuan }}</span>
                 </div>
               </td>
-              <td>
+              <td data-label="Pengirim / Asal">
                 <div v-if="surat.namaPengirim">{{ surat.namaPengirim }}</div>
                 <div v-if="surat.asalBarang" class="item-code">{{ surat.asalBarang }}</div>
                 <span v-if="!surat.namaPengirim && !surat.asalBarang">-</span>
               </td>
-              <td>{{ surat.namaPenerima || '-' }}</td>
+              <td data-label="Diterima Oleh">{{ surat.namaPenerima || '-' }}</td>
               <td class="actions-cell">
                 <button type="button" class="icon-btn" aria-label="Ubah" @click="openEdit(surat)">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3Z" /></svg>
+                  <span class="mobile-only">Ubah</span>
                 </button>
                 <button
                   type="button"
@@ -144,6 +145,7 @@ const user = useCurrentUser()
                   @click="handleDelete(surat)"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 7h14M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m-9 0 1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13" /></svg>
+                  <span class="mobile-only">Hapus</span>
                 </button>
               </td>
             </tr>
@@ -415,5 +417,96 @@ tbody tr:hover {
   color: var(--text-muted);
   padding: 32px 20px;
   white-space: normal;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .main {
+    padding: 16px 14px 28px;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .panel-actions {
+    width: 100%;
+  }
+
+  .btn-solid {
+    flex: 1;
+    justify-content: center;
+  }
+
+  table,
+  thead,
+  tbody,
+  tr,
+  td {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody tr {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 12px;
+  }
+
+  tbody tr:hover {
+    background: var(--surface);
+  }
+
+  tbody td {
+    border: none;
+    padding: 6px 0;
+  }
+
+  tbody td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  td.row-no {
+    display: none;
+  }
+
+  td.actions-cell {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding-top: 10px;
+    margin-top: 4px;
+    border-top: 1px solid var(--border);
+  }
+
+  .icon-btn {
+    width: auto;
+    padding: 7px 12px;
+  }
+
+  .mobile-only {
+    display: inline;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  .empty-row {
+    padding: 24px 14px;
+  }
 }
 </style>

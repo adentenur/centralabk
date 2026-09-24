@@ -306,4 +306,30 @@ tbody tr:hover {
   color: var(--text-muted);
   padding: 32px 20px;
 }
+
+@media (max-width: 720px) {
+  .main {
+    padding: 16px 14px 28px;
+  }
+
+  .panel {
+    max-width: none;
+  }
+
+  .panel-head {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .panel-actions,
+  .btn-solid {
+    width: 100%;
+    justify-content: center;
+  }
+
+  thead th,
+  tbody td {
+    padding: 10px 12px;
+  }
+}
 </style>

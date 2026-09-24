@@ -418,7 +418,36 @@ async function handleSubmit() {
   }
 
   .item-row {
-    grid-template-columns: 1fr 70px 70px auto;
+    grid-template-columns: 1fr 1fr auto;
+    grid-template-areas: 'nama nama nama' 'jumlah satuan hapus';
+    row-gap: 6px;
+  }
+
+  .item-nama {
+    grid-area: nama;
+  }
+
+  .item-jumlah {
+    grid-area: jumlah;
+  }
+
+  .item-satuan {
+    grid-area: satuan;
+  }
+
+  .remove-item {
+    grid-area: hapus;
+  }
+
+  .modal-card {
+    padding: 18px 16px 20px;
+  }
+
+  .field input,
+  .field textarea,
+  .item-row input,
+  .item-row select {
+    font-size: 16px;
   }
 }
 </style>

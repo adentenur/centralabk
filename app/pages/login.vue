@@ -333,5 +333,13 @@ async function handleSubmit() {
   .login-visual {
     display: none;
   }
+
+  .login-form-pane {
+    padding: 40px 22px;
+  }
+
+  .field .input input {
+    font-size: 16px;
+  }
 }
 </style>

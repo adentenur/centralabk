@@ -205,4 +205,14 @@ async function handleSubmit() {
 .btn-ghost:hover {
   background: var(--surface-sunken);
 }
+
+@media (max-width: 560px) {
+  .modal-card {
+    padding: 18px 16px 20px;
+  }
+
+  .field input {
+    font-size: 16px;
+  }
+}
 </style>
