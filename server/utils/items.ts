@@ -3,7 +3,7 @@ import type { Item } from '@prisma/client'
 export const KONDISI_VALUES = ['Baik', 'Perbaikan', 'Rusak'] as const
 export type Kondisi = (typeof KONDISI_VALUES)[number]
 
-export function mapItem(item: Item) {
+export function mapItem(item: Item, lihatHarga: boolean) {
   return {
     id: item.id,
     kode: item.kode,
@@ -12,8 +12,8 @@ export function mapItem(item: Item) {
     namaToko: item.namaToko,
     jumlah: item.jumlah,
     satuan: item.satuan,
-    hargaSatuan: item.hargaSatuan,
-    total: item.jumlah * item.hargaSatuan,
+    hargaSatuan: lihatHarga ? item.hargaSatuan : null,
+    total: lihatHarga ? item.jumlah * item.hargaSatuan : null,
     lokasi: item.lokasi,
     kondisi: item.kondisi,
     createdAt: item.createdAt,

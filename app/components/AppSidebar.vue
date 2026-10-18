@@ -62,6 +62,10 @@ async function handleLogout() {
     </div>
 
     <p class="nav-label">Menu</p>
+    <NuxtLink to="/murid" class="nav-item" active-class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2" /><path d="M3 20c0-3.4 2.7-5.8 6-5.8s6 2.4 6 5.8" /><path d="M16 4.8a3.2 3.2 0 0 1 0 6.3M18 14.6c1.8.7 3 2.6 3 5.4" /></svg>
+      Murid
+    </NuxtLink>
     <NuxtLink to="/inventaris" class="nav-item" active-class="active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.3" /><rect x="13.5" y="3.5" width="7" height="7" rx="1.3" /><rect x="3.5" y="13.5" width="7" height="7" rx="1.3" /><rect x="13.5" y="13.5" width="7" height="7" rx="1.3" /></svg>
       Inventaris
@@ -80,14 +84,23 @@ async function handleLogout() {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" /></svg>
       Satuan
     </NuxtLink>
+    <NuxtLink v-if="user?.role === 'superadmin'" to="/pengaturan/pengguna" class="nav-item" active-class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.5 3.2 8.4 7.5 9.5 4.3-1.1 7.5-5 7.5-9.5V6L12 3Z" /><circle cx="12" cy="10" r="2.4" /><path d="M8.3 16.2c.8-1.6 2.1-2.4 3.7-2.4s2.9.8 3.7 2.4" /></svg>
+      Pengguna
+    </NuxtLink>
+    <NuxtLink v-if="user?.role === 'superadmin'" to="/pengaturan/fitur" class="nav-item" active-class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="7" width="19" height="10" rx="5" /><circle cx="16.5" cy="12" r="3" /></svg>
+      Fitur
+    </NuxtLink>
 
-    <div class="user-block">
+    <NuxtLink to="/pengaturan/akun" class="user-block" active-class="active" title="Akun Saya: ganti password">
       <div class="avatar">{{ initials }}</div>
       <div class="who">
         <b>{{ user?.username || '—' }}</b>
-        <span>{{ user?.nama || 'Administrator' }}</span>
+        <span>{{ roleLabel(user?.role) }} · Akun saya</span>
       </div>
-    </div>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6" /></svg>
+    </NuxtLink>
 
     <button type="button" class="nav-item logout" :disabled="loggingOut" @click="handleLogout">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" /></svg>
@@ -111,7 +124,10 @@ async function handleLogout() {
   padding: 22px 16px;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .brand {
@@ -225,6 +241,22 @@ async function handleLogout() {
   padding: 10px 11px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   margin-top: 6px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+}
+
+.user-block:hover,
+.user-block.active {
+  background: var(--sidebar-bg-active);
+}
+
+.user-block .chevron {
+  width: 15px;
+  height: 15px;
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--sidebar-text-dim);
 }
 
 .avatar {

@@ -70,6 +70,13 @@ const filteredItems = computed(() => {
 })
 
 const user = useCurrentUser()
+const lihatHarga = computed(() => user.value?.bisaLihatHarga === true)
+
+// No, Nama, Kategori, Toko, Jumlah, [Harga, Total], Lokasi, Kondisi, Aksi
+const columnWidths = computed(() => lihatHarga.value
+  ? [4, 16, 10, 13, 7, 11, 11, 11, 9, 8]
+  : [4, 22, 13, 17, 10, 14, 11, 9])
+const columnCount = computed(() => columnWidths.value.length)
 </script>
 
 <template>
@@ -81,7 +88,7 @@ const user = useCurrentUser()
       </div>
       <div class="user-chip">
         <div class="avatar">{{ (user?.username || 'AA').slice(0, 2).toUpperCase() }}</div>
-        <div class="who"><b>{{ user?.username }}</b><span>{{ user?.nama || 'Administrator' }}</span></div>
+        <div class="who"><b>{{ user?.username }}</b><span>{{ roleLabel(user?.role) }}</span></div>
       </div>
     </div>
 
@@ -125,16 +132,7 @@ const user = useCurrentUser()
       <div class="table-scroll">
         <table>
           <colgroup>
-            <col style="width: 4%">
-            <col style="width: 16%">
-            <col style="width: 10%">
-            <col style="width: 13%">
-            <col style="width: 7%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 11%">
-            <col style="width: 9%">
-            <col style="width: 8%">
+            <col v-for="(width, index) in columnWidths" :key="`${lihatHarga}-${index}`" :style="{ width: `${width}%` }">
           </colgroup>
           <thead>
             <tr>
@@ -143,8 +141,10 @@ const user = useCurrentUser()
               <th>Kategori</th>
               <th>Nama Toko</th>
               <th>Jumlah</th>
-              <th>Harga Satuan</th>
-              <th>Total</th>
+              <template v-if="lihatHarga">
+                <th>Harga Satuan</th>
+                <th>Total</th>
+              </template>
               <th>Lokasi</th>
               <th>Kondisi</th>
               <th class="actions-head">Aksi</th>
@@ -160,8 +160,10 @@ const user = useCurrentUser()
               <td data-label="Kategori">{{ item.kategori || '-' }}</td>
               <td data-label="Nama Toko">{{ item.namaToko || '-' }}</td>
               <td class="figures" data-label="Jumlah">{{ item.jumlah }} {{ item.satuan || '-' }}</td>
-              <td class="figures" data-label="Harga Satuan">{{ formatRupiah(item.hargaSatuan) }}</td>
-              <td class="figures" data-label="Total">{{ formatRupiah(item.total) }}</td>
+              <template v-if="lihatHarga">
+                <td class="figures" data-label="Harga Satuan">{{ formatRupiah(item.hargaSatuan ?? 0) }}</td>
+                <td class="figures" data-label="Total">{{ formatRupiah(item.total ?? 0) }}</td>
+              </template>
               <td data-label="Lokasi">{{ item.lokasi || '-' }}</td>
               <td data-label="Kondisi"><span class="pill" :class="kondisiPillClass(item.kondisi)">{{ item.kondisi }}</span></td>
               <td class="actions-cell">
@@ -182,10 +184,10 @@ const user = useCurrentUser()
               </td>
             </tr>
             <tr v-if="items?.length && !filteredItems.length">
-              <td colspan="10" class="empty-row">Tidak ada barang yang cocok dengan pencarian "{{ searchQuery }}".</td>
+              <td :colspan="columnCount" class="empty-row">Tidak ada barang yang cocok dengan pencarian "{{ searchQuery }}".</td>
             </tr>
             <tr v-else-if="!items?.length">
-              <td colspan="10" class="empty-row">Belum ada barang tercatat. Klik "Tambah Barang" untuk mulai mengisi inventaris.</td>
+              <td :colspan="columnCount" class="empty-row">Belum ada barang tercatat. Klik "Tambah Barang" untuk mulai mengisi inventaris.</td>
             </tr>
           </tbody>
         </table>

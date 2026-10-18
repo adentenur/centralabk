@@ -1,18 +1,18 @@
-export default defineNuxtRouteMiddleware(async (to) => {
-  const requestFetch = useRequestFetch()
-  let authenticated = true
-  try {
-    await requestFetch('/api/auth/me')
-  } catch {
-    authenticated = false
-  }
+const SUPERADMIN_ONLY = ['/pengaturan/fitur', '/pengaturan/pengguna']
 
-  if (!authenticated) {
+export default defineNuxtRouteMiddleware(async (to) => {
+  const user = await fetchCurrentUser()
+
+  if (!user) {
     if (to.path !== '/login') return navigateTo('/login')
     return
   }
 
   if (to.path === '/login' || to.path === '/') {
+    return navigateTo('/inventaris')
+  }
+
+  if (user.role !== 'superadmin' && SUPERADMIN_ONLY.some((path) => to.path.startsWith(path))) {
     return navigateTo('/inventaris')
   }
 })

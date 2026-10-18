@@ -1,6 +1,8 @@
-interface CurrentUser {
+export interface CurrentUser {
   username: string
   nama: string
+  role: 'superadmin' | 'admin'
+  bisaLihatHarga: boolean
 }
 
 export function useCurrentUser() {
@@ -16,4 +18,8 @@ export async function fetchCurrentUser() {
     user.value = null
   }
   return user.value
+}
+
+export function roleLabel(role: string | undefined) {
+  return role === 'superadmin' ? 'Superadmin' : 'Admin'
 }

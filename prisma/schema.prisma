@@ -12,9 +12,19 @@ model User {
   id           Int    @id @default(autoincrement())
   username     String @unique
   passwordHash String @map("password_hash")
-  nama         String
+  nama           String
+  role           String @default("admin")
+  sessionVersion Int    @default(0) @map("session_version")
 
   @@map("users")
+}
+
+model Setting {
+  key       String @id
+  value     String
+  updatedAt String @map("updated_at")
+
+  @@map("settings")
 }
 
 model Item {
@@ -67,4 +77,23 @@ model SuratJalanItem {
   urutan       Int        @default(0)
 
   @@map("surat_jalan_items")
+}
+
+model Murid {
+  id              Int    @id @default(autoincrement())
+  nomorRekamMedis String @default("") @map("nomor_rekam_medis")
+  tanggalAsesmen  String @default("") @map("tanggal_asesmen")
+  namaAnak        String @map("nama_anak")
+  namaPanggilan   String @default("") @map("nama_panggilan")
+  tanggalLahir    String @default("") @map("tanggal_lahir")
+  jenisKelamin    String @default("") @map("jenis_kelamin")
+  namaOrangTua    String @default("") @map("nama_orang_tua")
+  nomorTelepon    String @default("") @map("nomor_telepon")
+  sekolah         String @default("")
+  kelas           String @default("")
+  asesmen         Json   @default("{}")
+  createdAt       String @map("created_at")
+  updatedAt       String @map("updated_at")
+
+  @@map("murid")
 }

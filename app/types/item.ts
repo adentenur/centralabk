@@ -6,8 +6,8 @@ export interface Item {
   namaToko: string
   jumlah: number
   satuan: string
-  hargaSatuan: number
-  total: number
+  hargaSatuan: number | null
+  total: number | null
   lokasi: string
   kondisi: 'Baik' | 'Perbaikan' | 'Rusak'
   createdAt: string

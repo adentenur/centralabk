@@ -59,7 +59,7 @@ const user = useCurrentUser()
       </div>
       <div class="user-chip">
         <div class="avatar">{{ (user?.username || 'AA').slice(0, 2).toUpperCase() }}</div>
-        <div class="who"><b>{{ user?.username }}</b><span>{{ user?.nama || 'Administrator' }}</span></div>
+        <div class="who"><b>{{ user?.username }}</b><span>{{ roleLabel(user?.role) }}</span></div>
       </div>
     </div>
 

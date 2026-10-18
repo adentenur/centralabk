@@ -9,13 +9,15 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Barang tidak ditemukan' })
   }
 
+  const lihatHarga = await bisaLihatHarga(await requireAuthUser(event))
   const body = await readBody(event)
-  const input = parseItemInput(body ?? {})
+  const { hargaSatuan, ...input } = parseItemInput(body ?? {})
 
+  // Pengguna yang tidak boleh melihat harga juga tidak boleh mengubahnya; harga lama dipertahankan.
   const item = await prisma.item.update({
     where: { id },
-    data: { ...input, updatedAt: new Date().toISOString() }
+    data: { ...input, ...(lihatHarga ? { hargaSatuan } : {}), updatedAt: new Date().toISOString() }
   })
 
-  return mapItem(item)
+  return mapItem(item, lihatHarga)
 })

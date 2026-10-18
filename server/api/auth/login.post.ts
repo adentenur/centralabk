@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const session = await useAuthSession(event)
-  await session.update({ userId: user.id, username: user.username, nama: user.nama })
+  await session.update({ userId: user.id, sessionVersion: user.sessionVersion })
 
   return { username: user.username, nama: user.nama }
 })

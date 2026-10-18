@@ -1,14 +1,24 @@
 import bcrypt from 'bcryptjs'
 
-export async function ensureSeeded() {
-  const adminUsername = 'adminabk'
-  const existingAdmin = await prisma.user.findUnique({ where: { username: adminUsername } })
-  if (!existingAdmin) {
-    const passwordHash = bcrypt.hashSync('deliserdang2026', 10)
-    await prisma.user.create({
-      data: { username: adminUsername, passwordHash, nama: 'Administrator' }
-    })
+// Superadmin pertama hanya dibuat saat tabel users masih kosong (instalasi baru).
+// Password diambil dari .env, bukan dari kode; pengguna lain dikelola lewat menu Pengaturan → Pengguna.
+async function ensureInitialSuperadmin() {
+  if ((await prisma.user.count()) > 0) return
+
+  const password = process.env.INITIAL_SUPERADMIN_PASSWORD
+  if (!password || password.length < 8) {
+    console.warn('[seed] Tabel users kosong. Isi INITIAL_SUPERADMIN_PASSWORD (min. 8 karakter) di .env lalu restart untuk membuat superadmin pertama.')
+    return
   }
+  const username = process.env.INITIAL_SUPERADMIN_USERNAME || 'adminabk'
+  await prisma.user.create({
+    data: { username, passwordHash: bcrypt.hashSync(password, 10), nama: 'Super Administrator', role: 'superadmin' }
+  })
+  console.info(`[seed] Superadmin pertama "${username}" dibuat. Segera ganti password lewat menu Akun Saya.`)
+}
+
+export async function ensureSeeded() {
+  await ensureInitialSuperadmin()
 
   const itemCount = await prisma.item.count()
   if (itemCount === 0) {

@@ -1,6 +1,3 @@
-<script setup lang="ts">
-await fetchCurrentUser()
-</script>
 
 <template>
   <div class="dash-shell">

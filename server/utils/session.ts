@@ -3,8 +3,7 @@ import { useSession } from 'h3'
 
 export interface AuthSessionData {
   userId?: number
-  username?: string
-  nama?: string
+  sessionVersion?: number
 }
 
 export function useAuthSession(event: H3Event) {

@@ -18,6 +18,8 @@ const saving = ref(false)
 const errorMsg = ref('')
 
 const { satuanOptions, loadSatuanOptions } = useSatuanOptions()
+const user = useCurrentUser()
+const lihatHarga = computed(() => user.value?.bisaLihatHarga === true)
 
 watch(
   () => [props.open, props.item],
@@ -99,7 +101,7 @@ async function handleSubmit() {
           <input id="namaToko" v-model="form.namaToko" type="text" placeholder="Contoh: Toko Komputer Medan Jaya">
         </div>
 
-        <div class="grid-3">
+        <div :class="lihatHarga ? 'grid-3' : 'grid-2'">
           <div class="field">
             <label for="jumlah">Jumlah <span class="optional">(opsional)</span></label>
             <input id="jumlah" v-model.number="form.jumlah" type="number" min="0" step="1" placeholder="0">
@@ -111,7 +113,7 @@ async function handleSubmit() {
               <option v-for="opt in satuanOptions" :key="opt.id" :value="opt.nama">{{ opt.nama }}</option>
             </select>
           </div>
-          <div class="field">
+          <div v-if="lihatHarga" class="field">
             <label for="hargaSatuan">Harga satuan (Rp) <span class="optional">(opsional)</span></label>
             <input id="hargaSatuan" v-model.number="form.hargaSatuan" type="number" min="0" step="1000" placeholder="0">
           </div>
