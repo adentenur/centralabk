@@ -40,7 +40,7 @@ async function handleLogout() {
       <div class="crate-mark">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></svg>
       </div>
-      <span>Gudang Inventaris</span>
+      <span>Central ABK</span>
     </div>
     <div class="mobile-avatar">{{ initials }}</div>
   </header>
@@ -53,8 +53,8 @@ async function handleLogout() {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></svg>
       </div>
       <div>
-        <p class="brand-name">Gudang Inventaris</p>
-        <p class="brand-sub">Kantor Deli Serdang</p>
+        <p class="brand-name">Central ABK</p>
+        <p class="brand-sub">Deli Serdang</p>
       </div>
       <button type="button" class="close-btn" aria-label="Tutup menu" @click="mobileOpen = false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6 6 18" /></svg>
@@ -65,6 +65,10 @@ async function handleLogout() {
     <NuxtLink to="/murid" class="nav-item" active-class="active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2" /><path d="M3 20c0-3.4 2.7-5.8 6-5.8s6 2.4 6 5.8" /><path d="M16 4.8a3.2 3.2 0 0 1 0 6.3M18 14.6c1.8.7 3 2.6 3 5.4" /></svg>
       Murid
+    </NuxtLink>
+    <NuxtLink to="/pkbm" class="nav-item" active-class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18" /><path d="M5 21V9l7-5 7 5v12" /><path d="M10 21v-6h4v6" /></svg>
+      PKBM
     </NuxtLink>
     <NuxtLink to="/inventaris" class="nav-item" active-class="active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.3" /><rect x="13.5" y="3.5" width="7" height="7" rx="1.3" /><rect x="3.5" y="13.5" width="7" height="7" rx="1.3" /><rect x="13.5" y="13.5" width="7" height="7" rx="1.3" /></svg>

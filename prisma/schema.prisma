@@ -94,6 +94,53 @@ model Murid {
   asesmen         Json   @default("{}")
   createdAt       String @map("created_at")
   updatedAt       String @map("updated_at")
+  pkbmId          Int?   @map("pkbm_id")
+  pkbm            Pkbm?  @relation(fields: [pkbmId], references: [id], onDelete: SetNull)
+  dokumen         MuridDokumen[]
 
   @@map("murid")
+}
+
+model MuridDokumen {
+  id        Int    @id @default(autoincrement())
+  muridId   Int    @map("murid_id")
+  murid     Murid  @relation(fields: [muridId], references: [id], onDelete: Cascade)
+  jenis     String
+  namaFile  String @map("nama_file")
+  mimeType  String @map("mime_type")
+  ukuran    Int
+  data      Bytes
+  createdAt String @map("created_at")
+
+  @@unique([muridId, jenis])
+  @@map("murid_dokumen")
+}
+
+model Pkbm {
+  id                 Int           @id @default(autoincrement())
+  nama               String
+  kecamatan          String        @default("")
+  statusIzin         String        @default("Berizin") @map("status_izin")
+  jamOperasional     String        @default("") @map("jam_operasional")
+  nilaiJam           String        @default("") @map("nilai_jam")
+  kepalaSekolah      String        @default("") @map("kepala_sekolah")
+  nilaiKepalaSekolah String        @default("") @map("nilai_kepala_sekolah")
+  fasilitas          Json          @default("[]")
+  createdAt          String        @map("created_at")
+  updatedAt          String        @map("updated_at")
+  relawan            PkbmRelawan[]
+  murid              Murid[]
+
+  @@map("pkbm")
+}
+
+model PkbmRelawan {
+  id     Int    @id @default(autoincrement())
+  pkbmId Int    @map("pkbm_id")
+  pkbm   Pkbm   @relation(fields: [pkbmId], references: [id], onDelete: Cascade)
+  nama   String
+  nilai  String @default("")
+  urutan Int    @default(0)
+
+  @@map("pkbm_relawan")
 }

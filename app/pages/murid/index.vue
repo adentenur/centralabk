@@ -10,6 +10,7 @@ interface MuridSummary {
   namaOrangTua: string
   nomorTelepon: string
   sekolah: string
+  pkbmNama: string
   kelas: string
 }
 
@@ -23,7 +24,7 @@ const filteredMurid = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
   if (!query) return muridList.value ?? []
   return (muridList.value ?? []).filter((murid) =>
-    [murid.namaAnak, murid.namaPanggilan, murid.nomorRekamMedis, murid.namaOrangTua, murid.sekolah, murid.nomorTelepon]
+    [murid.namaAnak, murid.namaPanggilan, murid.nomorRekamMedis, murid.namaOrangTua, murid.sekolah, murid.nomorTelepon, murid.pkbmNama]
       .some((field) => field.toLowerCase().includes(query))
   )
 })
@@ -75,7 +76,7 @@ const user = useCurrentUser()
         <div class="panel-actions">
           <div class="search-box">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.35-4.35" /></svg>
-            <input v-model="searchQuery" type="text" placeholder="Cari nama, No. RM, orang tua, sekolah..." aria-label="Cari murid">
+            <input v-model="searchQuery" type="text" placeholder="Cari nama, No. RM, orang tua, PKBM, sekolah..." aria-label="Cari murid">
           </div>
           <NuxtLink to="/murid/tambah" class="btn-solid">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" /></svg>
@@ -104,7 +105,7 @@ const user = useCurrentUser()
               <th>Jenis Kelamin</th>
               <th>Usia</th>
               <th>Orang Tua / Wali</th>
-              <th>Sekolah</th>
+              <th>PKBM / Sekolah</th>
               <th>Tgl Asesmen</th>
               <th class="actions-head">Aksi</th>
             </tr>
@@ -123,8 +124,9 @@ const user = useCurrentUser()
                 <div>{{ murid.namaOrangTua || '-' }}</div>
                 <div v-if="murid.nomorTelepon" class="item-code figures">{{ murid.nomorTelepon }}</div>
               </td>
-              <td data-label="Sekolah">
-                <div>{{ murid.sekolah || '-' }}</div>
+              <td data-label="PKBM / Sekolah">
+                <div v-if="murid.pkbmNama" class="pkbm-tag">{{ murid.pkbmNama }}</div>
+                <div>{{ murid.sekolah || (murid.pkbmNama ? '' : '-') }}</div>
                 <div v-if="murid.kelas" class="item-code">Kelas {{ murid.kelas }}</div>
               </td>
               <td class="figures" data-label="Tgl Asesmen">{{ formatTanggal(murid.tanggalAsesmen) }}</td>
@@ -362,6 +364,17 @@ tbody tr:hover {
 .item-name:hover {
   color: var(--accent);
   text-decoration: underline;
+}
+
+.pkbm-tag {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--accent-strong);
+  background: var(--accent-tint);
+  border-radius: 6px;
+  padding: 1px 7px;
+  margin-bottom: 3px;
 }
 
 .item-code {

@@ -3,6 +3,8 @@ interface MuridDetail {
   id: number
   namaAnak: string
   nomorRekamMedis: string
+  pkbmId: number | null
+  pkbmNama: string
   data: Record<string, any>
 }
 
@@ -19,14 +21,14 @@ const { data: murid, error } = await useAsyncData(`murid-${muridId}`, () => requ
       <NuxtLink to="/murid" class="back-link">← Daftar murid</NuxtLink>
       <h2>{{ murid ? `Ubah Data: ${murid.namaAnak}` : 'Data Murid' }}</h2>
       <p v-if="murid" class="sub">
-        {{ murid.nomorRekamMedis ? `No. RM ${murid.nomorRekamMedis} · ` : '' }}Formulir Informal Asesmen Awal Anak Berkebutuhan Khusus (ABK)
+        {{ murid.nomorRekamMedis ? `No. RM ${murid.nomorRekamMedis} · ` : '' }}{{ murid.pkbmNama ? `${murid.pkbmNama} · ` : '' }}Formulir Informal Asesmen Awal Anak Berkebutuhan Khusus (ABK)
       </p>
     </div>
 
     <p v-if="error || !murid" class="not-found">
       Data murid tidak ditemukan. Mungkin sudah dihapus. <NuxtLink to="/murid">Kembali ke daftar murid</NuxtLink>
     </p>
-    <MuridForm v-else mode="edit" :murid-id="murid.id" :initial-data="murid.data" />
+    <MuridForm v-else mode="edit" :murid-id="murid.id" :initial-data="murid.data" :initial-pkbm-id="murid.pkbmId" />
   </main>
 </template>
 

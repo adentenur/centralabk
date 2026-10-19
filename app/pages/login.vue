@@ -53,13 +53,8 @@ async function handleSubmit() {
         <div class="crate-mark">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5 9-5Z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></svg>
         </div>
-        <h1 class="lede">Sistem Inventaris Barang</h1>
-        <p class="lede-sub">Kelola data barang, kondisi, dan lokasi penyimpanan kantor secara terpusat dan rapi.</p>
-      </div>
-      <div class="stat-row">
-        <div><b class="figures">238</b><span>Barang tercatat</span></div>
-        <div><b class="figures">12</b><span>Kategori</span></div>
-        <div><b class="figures">6</b><span>Lokasi</span></div>
+        <h1 class="lede">Database Central ABK</h1>
+        <p class="lede-sub">Deli Serdang</p>
       </div>
     </div>
 
@@ -75,14 +70,14 @@ async function handleSubmit() {
           <label for="username">Nama pengguna</label>
           <div class="input">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4" /><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5" /></svg>
-            <input id="username" v-model="username" type="text" autocomplete="username" placeholder="adminabk" required>
+            <input id="username" v-model="username" type="text" autocomplete="username" required>
           </div>
         </div>
         <div class="field">
           <label for="password">Kata sandi</label>
           <div class="input">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="10.5" width="14" height="9" rx="2" /><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" /></svg>
-            <input id="password" v-model="password" type="password" autocomplete="current-password" placeholder="••••••••••••" required>
+            <input id="password" v-model="password" type="password" autocomplete="current-password" required>
           </div>
         </div>
         <button class="login-btn" type="submit" :disabled="loading">{{ loading ? 'Memproses…' : 'Masuk' }}</button>
@@ -150,23 +145,6 @@ async function handleSubmit() {
   line-height: 1.6;
 }
 
-.login-visual .stat-row {
-  display: flex;
-  gap: 28px;
-}
-
-.login-visual .stat-row div b {
-  display: block;
-  font-family: Georgia, serif;
-  font-size: 22px;
-  color: #fff;
-}
-
-.login-visual .stat-row div span {
-  font-size: 12px;
-  color: var(--sidebar-text-dim);
-}
-
 .login-form-pane {
   padding: 56px;
   display: flex;
@@ -227,7 +205,7 @@ async function handleSubmit() {
   align-items: center;
   gap: 10px;
   border: 1px solid var(--border);
-  background: var(--surface-sunken);
+  background: var(--surface);
   border-radius: 9px;
   padding: 4px 13px;
 }

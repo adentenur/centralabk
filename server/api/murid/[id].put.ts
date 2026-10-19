@@ -4,11 +4,12 @@ export default defineEventHandler(async (event) => {
   if (!existing) throw createError({ statusCode: 404, statusMessage: 'Data murid tidak ditemukan' })
 
   const body = await readBody(event)
-  const input = parseMuridInput(body ?? {})
+  const input = await parseMuridInput(body ?? {})
 
   const murid = await prisma.murid.update({
     where: { id },
-    data: { ...input, updatedAt: new Date().toISOString() }
+    data: { ...input, updatedAt: new Date().toISOString() },
+    include: { pkbm: { select: { nama: true } } }
   })
 
   return mapMurid(murid)

@@ -88,7 +88,7 @@ export const ASESMEN_SECTIONS: AsesmenSection[] = [
     fields: [
       { type: 'number', key: 'usiaKehamilan', label: 'Usia kehamilan', suffix: 'minggu' },
       { type: 'radio', key: 'kehamilan', label: 'Kehamilan', options: ['Normal', 'Dengan komplikasi', 'Tidak diketahui'] },
-      { type: 'radio', key: 'persalinan', label: 'Persalinan', options: ['Spontan', 'Caesar', 'Tindakan lain', 'Tidak diketahui'] },
+      { type: 'radio', key: 'persalinan', label: 'Persalinan', options: ['Normal', 'Caesar', 'Tindakan lain', 'Tidak diketahui'] },
       { type: 'number', key: 'beratLahir', label: 'Berat lahir', suffix: 'gram' },
       { type: 'number', key: 'panjangLahir', label: 'Panjang lahir', suffix: 'cm' },
       { type: 'radio', key: 'kondisiSetelahLahir', label: 'Kondisi setelah lahir', options: ['Baik', 'Membutuhkan perawatan khusus', 'NICU/perawatan intensif', 'Tidak diketahui'] },

@@ -5,9 +5,11 @@ const props = defineProps<{
   mode: 'create' | 'edit'
   muridId?: number
   initialData?: Record<string, any> | null
+  initialPkbmId?: number | null
 }>()
 
 const data = ref<Record<string, any>>(mergeAsesmen(props.initialData))
+const pkbmId = ref<number | null>(props.initialPkbmId ?? null)
 if (props.mode === 'create' && !data.value.tanggalAsesmen) {
   data.value.tanggalAsesmen = new Date().toISOString().slice(0, 10)
 }
@@ -63,6 +65,147 @@ function isFullWidth(field: AsesmenField) {
   return field.full || ['textarea', 'radio', 'checkbox', 'grid', 'heading', 'info'].includes(field.type)
 }
 
+// ---- Dokumen (foto anak, Kartu Keluarga, kartu BPJS) ----
+interface DokumenMeta {
+  jenis: string
+  namaFile: string
+  mimeType: string
+  ukuran: number
+  createdAt: string
+}
+
+interface DokumenDipilih {
+  file: File
+  previewUrl: string | null
+}
+
+const DOKUMEN = [
+  { jenis: 'foto', label: 'Foto anak', accept: 'image/jpeg,image/png,image/webp', hint: 'JPG, PNG, atau WEBP' },
+  { jenis: 'kk', label: 'Kartu Keluarga', accept: 'image/jpeg,image/png,image/webp,application/pdf', hint: 'Foto atau PDF' },
+  { jenis: 'bpjs', label: 'Kartu BPJS', accept: 'image/jpeg,image/png,image/webp,application/pdf', hint: 'Foto atau PDF' }
+]
+const MAKS_UKURAN = 5 * 1024 * 1024
+
+// Saat menambah murid, id baru tersedia setelah disimpan; disimpan di sini agar
+// jika upload dokumen gagal, menyimpan ulang memperbarui murid yang sama (bukan membuat duplikat).
+const savedId = ref<number | null>(props.muridId ?? null)
+const dokumenAda = ref<Record<string, DokumenMeta>>({})
+const dokumenDipilih = ref<Record<string, DokumenDipilih>>({})
+const dokumenDihapus = ref<Record<string, boolean>>({})
+const dokumenError = ref<Record<string, string>>({})
+const dokumenMemproses = ref<Record<string, boolean>>({})
+
+onMounted(async () => {
+  if (!savedId.value) return
+  try {
+    const list = await $fetch<DokumenMeta[]>(`/api/murid/${savedId.value}/dokumen`)
+    dokumenAda.value = Object.fromEntries(list.map((d) => [d.jenis, d]))
+  } catch {
+    // Daftar dokumen gagal dimuat; form tetap bisa dipakai.
+  }
+})
+
+onBeforeUnmount(() => {
+  for (const item of Object.values(dokumenDipilih.value)) {
+    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl)
+  }
+})
+
+async function kecilkanGambar(file: File): Promise<File> {
+  if (!file.type.startsWith('image/')) return file
+  try {
+    const bitmap = await createImageBitmap(file)
+    const skala = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.round(bitmap.width * skala)
+    canvas.height = Math.round(bitmap.height * skala)
+    canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+    bitmap.close()
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85))
+    if (!blob || blob.size >= file.size) return file
+    return new File([blob], file.name.replace(/\.[^.]*$/, '') + '.jpg', { type: 'image/jpeg' })
+  } catch {
+    return file
+  }
+}
+
+async function pilihDokumen(jenis: string, event: Event) {
+  const input = event.target as HTMLInputElement
+  const asli = input.files?.[0]
+  input.value = ''
+  if (!asli) return
+  dokumenError.value[jenis] = ''
+  dokumenMemproses.value[jenis] = true
+  try {
+    const file = await kecilkanGambar(asli)
+    if (file.size > MAKS_UKURAN) {
+      dokumenError.value[jenis] = 'Ukuran file maksimal 5 MB.'
+      return
+    }
+    batalPilih(jenis)
+    dokumenDipilih.value[jenis] = {
+      file,
+      previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+    }
+    dokumenDihapus.value[jenis] = false
+  } finally {
+    dokumenMemproses.value[jenis] = false
+  }
+}
+
+function batalPilih(jenis: string) {
+  const item = dokumenDipilih.value[jenis]
+  if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl)
+  delete dokumenDipilih.value[jenis]
+}
+
+function tandaiHapus(jenis: string) {
+  batalPilih(jenis)
+  dokumenDihapus.value[jenis] = true
+}
+
+function statusDokumen(jenis: string) {
+  const dipilih = dokumenDipilih.value[jenis]
+  if (dipilih) return { nama: dipilih.file.name, isImage: !!dipilih.previewUrl, url: dipilih.previewUrl, baru: true }
+  const ada = dokumenAda.value[jenis]
+  if (ada && !dokumenDihapus.value[jenis] && savedId.value) {
+    return {
+      nama: ada.namaFile,
+      isImage: ada.mimeType.startsWith('image/'),
+      url: `/api/murid/${savedId.value}/dokumen/${jenis}?v=${encodeURIComponent(ada.createdAt)}`,
+      baru: false
+    }
+  }
+  return null
+}
+
+function formatUkuran(byte: number) {
+  return byte >= 1024 * 1024 ? `${(byte / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(byte / 1024))} KB`
+}
+
+async function simpanDokumen(muridId: number) {
+  const gagal: string[] = []
+  for (const { jenis, label } of DOKUMEN) {
+    try {
+      const dipilih = dokumenDipilih.value[jenis]
+      if (dipilih) {
+        const body = new FormData()
+        body.append('file', dipilih.file, dipilih.file.name)
+        dokumenAda.value[jenis] = await $fetch<DokumenMeta>(`/api/murid/${muridId}/dokumen/${jenis}`, { method: 'PUT', body })
+        batalPilih(jenis)
+      } else if (dokumenDihapus.value[jenis] && dokumenAda.value[jenis]) {
+        await $fetch(`/api/murid/${muridId}/dokumen/${jenis}`, { method: 'DELETE' })
+        delete dokumenAda.value[jenis]
+        dokumenDihapus.value[jenis] = false
+      }
+    } catch (err: any) {
+      dokumenError.value[jenis] = err?.data?.statusMessage || 'Gagal mengunggah file.'
+      gagal.push(label)
+    }
+  }
+  return gagal
+}
+
 async function handleSubmit() {
   if (saving.value) return
   errorMsg.value = ''
@@ -73,10 +216,18 @@ async function handleSubmit() {
   }
   saving.value = true
   try {
-    if (props.mode === 'edit' && props.muridId) {
-      await $fetch(`/api/murid/${props.muridId}`, { method: 'PUT', body: { data: data.value } })
+    if (savedId.value) {
+      await $fetch(`/api/murid/${savedId.value}`, { method: 'PUT', body: { data: data.value, pkbmId: pkbmId.value } })
     } else {
-      await $fetch('/api/murid', { method: 'POST', body: { data: data.value } })
+      const created = await $fetch<{ id: number }>('/api/murid', { method: 'POST', body: { data: data.value, pkbmId: pkbmId.value } })
+      savedId.value = created.id
+    }
+
+    const gagal = await simpanDokumen(savedId.value!)
+    if (gagal.length) {
+      errorMsg.value = `Data murid tersimpan, tetapi ${gagal.join(', ')} gagal diunggah. Periksa bagian Dokumen lalu klik Simpan lagi.`
+      document.getElementById('sec-dokumen')?.scrollIntoView({ behavior: 'smooth' })
+      return
     }
     await navigateTo('/murid')
   } catch (err: any) {
@@ -91,6 +242,7 @@ async function handleSubmit() {
   <form class="murid-form" novalidate @submit.prevent="handleSubmit">
     <nav class="section-nav" aria-label="Bagian formulir">
       <a v-for="section in ASESMEN_SECTIONS" :key="section.id" :href="`#sec-${section.id}`">{{ section.title }}</a>
+      <a href="#sec-dokumen">T. Dokumen</a>
     </nav>
 
     <div class="form-body">
@@ -99,6 +251,10 @@ async function handleSubmit() {
       <section v-for="section in ASESMEN_SECTIONS" :id="`sec-${section.id}`" :key="section.id" class="form-section">
         <h3>{{ section.title }}</h3>
         <div class="field-grid">
+          <div v-if="section.id === 'a'" class="field full">
+            <label for="f-pkbm">PKBM</label>
+            <PkbmSelect v-model="pkbmId" input-id="f-pkbm" />
+          </div>
           <template v-for="(field, index) in section.fields" :key="`${section.id}-${index}`">
             <template v-if="isVisible(field)">
               <h4 v-if="field.type === 'heading'" class="sub-heading">{{ field.text }}</h4>
@@ -172,6 +328,57 @@ async function handleSubmit() {
               </div>
             </template>
           </template>
+        </div>
+      </section>
+
+      <section id="sec-dokumen" class="form-section">
+        <h3>T. Dokumen</h3>
+        <p class="dok-intro">Unggah foto anak, Kartu Keluarga, dan kartu BPJS. Maksimal 5 MB per file. Foto akan dikecilkan otomatis. File diunggah saat formulir disimpan.</p>
+        <div class="dok-grid">
+          <div v-for="dok in DOKUMEN" :key="dok.jenis" class="dok-card" :class="{ pending: statusDokumen(dok.jenis)?.baru }">
+            <div class="dok-preview">
+              <template v-if="statusDokumen(dok.jenis)">
+                <img v-if="statusDokumen(dok.jenis)!.isImage" :src="statusDokumen(dok.jenis)!.url!" :alt="dok.label">
+                <div v-else class="dok-pdf">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" /><path d="M14 3v5h5" /></svg>
+                  <span>PDF</span>
+                </div>
+              </template>
+              <div v-else class="dok-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5" /><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" /></svg>
+                <span>Belum ada file</span>
+              </div>
+            </div>
+
+            <div class="dok-info">
+              <p class="dok-label">{{ dok.label }}</p>
+              <p v-if="statusDokumen(dok.jenis)" class="dok-file">
+                {{ statusDokumen(dok.jenis)!.nama }}
+                <template v-if="statusDokumen(dok.jenis)!.baru"> · {{ formatUkuran(dokumenDipilih[dok.jenis]!.file.size) }} · <b>belum disimpan</b></template>
+                <template v-else-if="dokumenAda[dok.jenis]"> · {{ formatUkuran(dokumenAda[dok.jenis]!.ukuran) }}</template>
+              </p>
+              <p v-else-if="dokumenDihapus[dok.jenis]" class="dok-file warn">Akan dihapus saat disimpan</p>
+              <p v-else class="dok-file">{{ dok.hint }}</p>
+              <p v-if="dokumenError[dok.jenis]" class="dok-error" role="alert">{{ dokumenError[dok.jenis] }}</p>
+            </div>
+
+            <div class="dok-actions">
+              <label class="dok-btn" :class="{ busy: dokumenMemproses[dok.jenis] }">
+                {{ dokumenMemproses[dok.jenis] ? 'Memproses…' : statusDokumen(dok.jenis) ? 'Ganti' : 'Pilih file' }}
+                <input type="file" :accept="dok.accept" class="visually-hidden" :disabled="dokumenMemproses[dok.jenis]" @change="pilihDokumen(dok.jenis, $event)">
+              </label>
+              <a
+                v-if="statusDokumen(dok.jenis) && !statusDokumen(dok.jenis)!.baru"
+                :href="statusDokumen(dok.jenis)!.url!"
+                target="_blank"
+                rel="noopener"
+                class="dok-btn ghost"
+              >Lihat</a>
+              <button v-if="statusDokumen(dok.jenis)?.baru" type="button" class="dok-btn ghost" @click="batalPilih(dok.jenis)">Batal</button>
+              <button v-else-if="statusDokumen(dok.jenis)" type="button" class="dok-btn danger" @click="tandaiHapus(dok.jenis)">Hapus</button>
+              <button v-else-if="dokumenDihapus[dok.jenis]" type="button" class="dok-btn ghost" @click="dokumenDihapus[dok.jenis] = false">Urungkan</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -416,6 +623,161 @@ async function handleSubmit() {
   background: var(--surface);
 }
 
+.dok-intro {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: -6px 0 14px;
+}
+
+.dok-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.dok-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+}
+
+.dok-card.pending {
+  border-color: var(--accent);
+}
+
+.dok-preview {
+  aspect-ratio: 4 / 3;
+  background: var(--surface-sunken);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.dok-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dok-empty,
+.dok-pdf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.dok-empty svg,
+.dok-pdf svg {
+  width: 26px;
+  height: 26px;
+}
+
+.dok-pdf {
+  color: var(--crit);
+  font-weight: 700;
+}
+
+.dok-info {
+  padding: 10px 12px 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.dok-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  margin: 0 0 3px;
+}
+
+.dok-file {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+  word-break: break-word;
+}
+
+.dok-file b {
+  color: var(--accent-strong);
+}
+
+.dok-file.warn {
+  color: var(--crit);
+  font-weight: 600;
+}
+
+.dok-error {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--crit);
+  margin: 6px 0 0;
+}
+
+.dok-actions {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px 12px;
+  flex-wrap: wrap;
+}
+
+.dok-btn {
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 7px;
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #f5fbf8;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.dok-btn:focus-within,
+.dok-btn:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
+.dok-btn.busy {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.dok-btn.ghost {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.dok-btn.danger {
+  background: var(--surface);
+  color: var(--crit);
+  border-color: var(--border);
+}
+
+.dok-btn.danger:hover {
+  border-color: var(--crit);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 .form-actions {
   position: sticky;
   bottom: 0;
@@ -490,6 +852,10 @@ async function handleSubmit() {
   .grid-row {
     grid-template-columns: 1fr;
     gap: 7px;
+  }
+
+  .dok-grid {
+    grid-template-columns: 1fr;
   }
 
   .input,
